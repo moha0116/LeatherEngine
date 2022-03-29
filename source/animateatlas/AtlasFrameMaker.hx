@@ -13,7 +13,7 @@ import animateatlas.displayobject.SpriteMovieClip;
 import flixel.graphics.FlxGraphic;
 import flixel.graphics.frames.FlxFramesCollection;
 import flixel.graphics.frames.FlxFrame;
-#if cpp
+#if MODS_ALLOWED
 import sys.FileSystem;
 import sys.io.File;
 #else
@@ -22,7 +22,6 @@ import js.html.File;
 #end
 
 using StringTools;
-
 class AtlasFrameMaker extends FlxFramesCollection
 {
 	//public static var widthoffset:Int = 0;
@@ -37,7 +36,7 @@ class AtlasFrameMaker extends FlxFramesCollection
 	*
 	*/
 
-	public static function construct(key:String,?library:String = "shared",?_excludeArray:Array<String> = null):FlxFramesCollection
+	public static function construct(key:String,?_excludeArray:Array<String> = null):FlxFramesCollection
 	{
 		// widthoffset = _widthoffset;
 		// heightoffset = _heightoffset;
@@ -45,26 +44,24 @@ class AtlasFrameMaker extends FlxFramesCollection
 		var frameCollection:FlxFramesCollection;
 		var frameArray:Array<Array<FlxFrame>> = [];
 
-		if (Assets.exists('assets/${library != "preload" ? '$library/' : ""}images/$key/spritemap1.json', TEXT))
+		if (Paths.fileExists('images/$key/spritemap1.json', TEXT))
 		{
-			//PlayState.instance.addTextToDebug("Only Spritemaps made with Adobe Animate 2018 are supported");
+			PlayState.instance.addTextToDebug("Only Spritemaps made with Adobe Animate 2018 are supported");
 			trace("Only Spritemaps made with Adobe Animate 2018 are supported");
 			return null;
 		}
 
-		var animationData:AnimationData = Json.parse(Assets.getText('assets/${library != "preload" ? '$library/' : ""}images/$key/Animation.json'));
-		var atlasData:AtlasData = Json.parse(Assets.getText('assets/${library != "preload" ? '$library/' : ""}images/$key/spritemap.json').replace("\uFEFF", ""));
+		var animationData:AnimationData = Json.parse(Paths.getTextFromFile('images/$key/Animation.json'));
+		var atlasData:AtlasData = Json.parse(Paths.getTextFromFile('images/$key/spritemap.json').replace("\uFEFF", ""));
 
-		var graphic:FlxGraphic = FlxGraphic.fromAssetKey(Paths.image('$key/spritemap'));
+		var graphic:FlxGraphic = Paths.image('$key/spritemap');
 		var ss:SpriteAnimationLibrary = new SpriteAnimationLibrary(animationData, atlasData, graphic.bitmap);
 		var t:SpriteMovieClip = ss.createAnimation();
-
 		if(_excludeArray == null)
 		{
 			_excludeArray = t.getFrameLabels();
 			//trace('creating all anims');
 		}
-		
 		trace('Creating: ' + _excludeArray);
 
 		frameCollection = new FlxFramesCollection(graphic, FlxFrameCollectionType.IMAGE);
